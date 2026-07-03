@@ -42,10 +42,13 @@ pip install -r requirements.txt
 ```
 
 ### 3. 프로그램 실행
-아래 스크립트를 기동하면 시스템 트레이 안내 알림과 함께 가이드 테이프와 설정 창이 나타납니다:
-```bash
-python main.py
-```
+* **간편 원클릭 실행 (추천)**:
+  프로젝트 폴더 내의 `run.bat` 파일을 더블 클릭하여 실행합니다. (검은색 콘솔 창이 뜨지 않아 바탕화면이 깔끔하게 유지됩니다.)
+* **터미널 실행**:
+  파워쉘 혹은 CMD 터미널에서 아래 스크립트를 기동합니다:
+  ```bash
+  python main.py
+  ```
 
 ---
 
@@ -55,6 +58,7 @@ python main.py
 KIMITE/
 ├── .gitignore          # 깃 제외 목록 (로컬 config.json 등 제외)
 ├── requirements.txt    # 의존성 라이브러리 목록 (PySide6)
+├── run.bat             # 검은 콘솔 창 없이 백그라운드로 실행하는 배치 파일
 ├── config.py           # 오버레이 설정 데이터 관리 및 JSON 입출력
 ├── overlay.py          # 마우스 관통 투명 오버레이 렌더링 화면
 ├── settings_window.py  # 세련된 다크 테마 QSS 스타일 제어 창
