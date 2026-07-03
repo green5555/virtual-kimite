@@ -38,12 +38,22 @@ class OverlayWindow(QWidget):
 
     def apply_click_through(self, hwnd):
         try:
-            # 64비트 및 32비트 호환성을 위한 GetWindowLong / SetWindowLong 호출
             # PySide6 winId()는 HWND 포인터 역할을 하므로 정수로 변환하여 API에 넘김
             hwnd_val = int(hwnd)
             style = user32.GetWindowLongW(hwnd_val, GWL_EXSTYLE)
-            style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
+            
+            # WS_EX_TRANSPARENT(클릭 관통)만 적용하고 WS_EX_LAYERED는 강제 지정하지 않음.
+            # Qt의 TranslucentBackground 속성이 설정되면 이미 WS_EX_LAYERED가 내부적으로 설정되므로,
+            # 수동으로 다시 덮어쓰면 렌더링 버그가 발생하여 오버레이가 아예 보이지 않게 될 수 있습니다.
+            style |= WS_EX_TRANSPARENT
             user32.SetWindowLongW(hwnd_val, GWL_EXSTYLE, style)
+            
+            # 스타일 변경 사항을 OS에 즉시 적용하도록 SetWindowPos 호출
+            SWP_NOMOVE = 0x0002
+            SWP_NOSIZE = 0x0001
+            SWP_NOZORDER = 0x0004
+            SWP_FRAMECHANGED = 0x0020
+            user32.SetWindowPos(hwnd_val, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED)
         except Exception as e:
             print(f"Error applying click-through style: {e}")
 
