@@ -1,5 +1,7 @@
 # Virtual Kimite (버추얼 키미테) 🎯
 
+![Virtual Kimite Preview](assets/preview.jpg)
+
 Virtual Kimite는 3D 게임, 영화 감상, 혹은 급격한 화면 전환 시 발생하는 화면 멀미(Motion Sickness)를 효과적으로 방지하기 위해 화면 상에 반투명한 노란색 가이드라인 테이프를 붙여주는 Windows 데스크톱 오버레이 프로그램입니다. 
 
 실제 모니터에 포스트잇이나 테이프를 붙이지 않고도 화면 상/하/좌/우/중앙에 기준점을 세워주어 시각적 안정감을 제공합니다.
