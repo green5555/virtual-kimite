@@ -1,0 +1,132 @@
+import ctypes
+from PySide6.QtCore import Qt, QPointF, QRectF
+from PySide6.QtGui import QPainter, QColor, QPolygonF, QBrush, QPen
+from PySide6.QtWidgets import QWidget, QApplication
+
+# Windows API 설정을 위한 ctypes 정의
+user32 = ctypes.windll.user32
+GWL_EXSTYLE = -20
+WS_EX_TRANSPARENT = 0x00000020
+WS_EX_LAYERED = 0x00080000
+
+class OverlayWindow(QWidget):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        
+        # 윈도우 플래그 설정: 테두리 없음, 항상 위, 작업표시줄 제외, 포커스 무시
+        self.setWindowFlags(
+            Qt.FramelessWindowHint |
+            Qt.WindowStaysOnTopHint |
+            Qt.Tool |
+            Qt.WindowDoesNotAcceptFocus
+        )
+        # 배경 투명화
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        
+        # 설정 변경 시 오버레이 화면 자동 갱신 및 위치 재조정
+        self.config.changed.connect(self.on_config_changed)
+        
+        # 위치 및 크기 설정 초기화
+        self.update_geometry()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        # 윈도우가 화면에 보일 때 마우스 클릭 관통(Click-through) 속성 부여
+        hwnd = self.winId()
+        self.apply_click_through(hwnd)
+
+    def apply_click_through(self, hwnd):
+        try:
+            # 64비트 및 32비트 호환성을 위한 GetWindowLong / SetWindowLong 호출
+            # PySide6 winId()는 HWND 포인터 역할을 하므로 정수로 변환하여 API에 넘김
+            hwnd_val = int(hwnd)
+            style = user32.GetWindowLongW(hwnd_val, GWL_EXSTYLE)
+            style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
+            user32.SetWindowLongW(hwnd_val, GWL_EXSTYLE, style)
+        except Exception as e:
+            print(f"Error applying click-through style: {e}")
+
+    def update_geometry(self):
+        screens = QApplication.screens()
+        idx = self.config.monitor_index
+        
+        if idx < len(screens):
+            screen = screens[idx]
+        else:
+            screen = QApplication.primaryScreen()
+            
+        if screen:
+            geom = screen.geometry()
+            self.setGeometry(geom)
+            
+    def on_config_changed(self):
+        # 켜짐/꺼짐 상태 확인
+        if self.config.enabled:
+            self.show()
+            self.update_geometry()
+            self.update()  # paintEvent 트리거
+        else:
+            self.hide()
+
+    def paintEvent(self, event):
+        if not self.config.enabled:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # 헥스 색상 코드 분석 및 투명도(alpha) 적용
+        hex_color = self.config.color.lstrip('#')
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        alpha = int(self.config.opacity * 2.55)  # 0~100 범위를 0~255로 변환
+        
+        tape_color = QColor(r, g, b, alpha)
+        brush = QBrush(tape_color)
+        painter.setPen(Qt.NoPen)  # 외곽선 없음
+
+        w = self.width()
+        h = self.height()
+        cx = w / 2
+        cy = h / 2
+        
+        thickness = self.config.thickness
+        length = self.config.length
+        center_size = self.config.center_size
+
+        # 1. 상단 테이프 (Top)
+        painter.drawRect(QRectF(cx - thickness / 2, 0, thickness, length))
+
+        # 2. 하단 테이프 (Bottom)
+        painter.drawRect(QRectF(cx - thickness / 2, h - length, thickness, length))
+
+        # 3. 좌측 테이프 (Left)
+        painter.drawRect(QRectF(0, cy - thickness / 2, length, thickness))
+
+        # 4. 우측 테이프 (Right)
+        painter.drawRect(QRectF(w - length, cy - thickness / 2, length, thickness))
+
+        # 5. 중앙 테이프 / 마크 (Center)
+        shape = self.config.shape
+        if shape == "diamond":
+            # 마름모 모양 다각형 그리기
+            points = [
+                QPointF(cx, cy - center_size),
+                QPointF(cx + center_size, cy),
+                QPointF(cx, cy + center_size),
+                QPointF(cx - center_size, cy)
+            ]
+            polygon = QPolygonF(points)
+            painter.drawPolygon(polygon)
+            
+        elif shape == "circle":
+            # 원 그리기
+            painter.drawEllipse(QPointF(cx, cy), center_size, center_size)
+            
+        elif shape == "square":
+            # 정사각형 그리기
+            painter.drawRect(QRectF(cx - center_size, cy - center_size, center_size * 2, center_size * 2))
+            
+        painter.end()
