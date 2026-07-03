@@ -146,4 +146,16 @@ class OverlayWindow(QWidget):
             # 정사각형 그리기
             painter.drawRect(QRectF(cx - center_size, cy - center_size, center_size * 2, center_size * 2))
             
+        elif shape == "cross":
+            # 십자 모양 그리기
+            pen = QPen(c_color)
+            line_width = max(3, int(thickness * 0.25))
+            pen.setWidth(line_width)
+            pen.setCapStyle(Qt.RoundCap)
+            painter.setPen(pen)
+            
+            # 가로선 및 세로선 그리기
+            painter.drawLine(QPointF(cx - center_size, cy), QPointF(cx + center_size, cy))
+            painter.drawLine(QPointF(cx, cy - center_size), QPointF(cx, cy + center_size))
+            
         painter.end()

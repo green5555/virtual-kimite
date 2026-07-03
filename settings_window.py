@@ -192,6 +192,7 @@ class SettingsWindow(QWidget):
         self.combo_shape.addItem("마름모 (Diamond)", "diamond")
         self.combo_shape.addItem("원형 (Circle)", "circle")
         self.combo_shape.addItem("정사각형 (Square)", "square")
+        self.combo_shape.addItem("십자 모양 (Cross)", "cross")
         form_layout.addRow("중앙 점 모양:", self.combo_shape)
 
         # 색상 선택 버튼 및 미리보기
