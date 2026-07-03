@@ -96,6 +96,7 @@ class OverlayWindow(QWidget):
         tape_color = QColor(r, g, b, alpha)
         brush = QBrush(tape_color)
         painter.setPen(Qt.NoPen)  # 외곽선 없음
+        painter.setBrush(brush)   # 브러시 설정 추가 (색상 채우기)
 
         w = self.width()
         h = self.height()
