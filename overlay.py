@@ -120,6 +120,12 @@ class OverlayWindow(QWidget):
         painter.drawRect(QRectF(w - length, cy - thickness / 2, length, thickness))
 
         # 5. 중앙 테이프 / 마크 (Center)
+        # 투명도 동시 조절 여부에 따른 중앙 점 투명도(Alpha) 재설정
+        c_opacity = self.config.opacity if self.config.sync_opacity else self.config.center_opacity
+        c_alpha = int(c_opacity * 2.55)
+        c_color = QColor(r, g, b, c_alpha)
+        painter.setBrush(QBrush(c_color))
+
         shape = self.config.shape
         if shape == "diamond":
             # 마름모 모양 다각형 그리기
