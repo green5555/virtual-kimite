@@ -123,7 +123,15 @@ class OverlayWindow(QWidget):
         # 투명도 동시 조절 여부에 따른 중앙 점 투명도(Alpha) 재설정
         c_opacity = self.config.opacity if self.config.sync_opacity else self.config.center_opacity
         c_alpha = int(c_opacity * 2.55)
-        c_color = QColor(r, g, b, c_alpha)
+        
+        # 색상 동시 조절 여부에 따른 중앙 점 색상 결정
+        c_color_hex = self.config.color if self.config.sync_color else self.config.center_color
+        c_color_hex = c_color_hex.lstrip('#')
+        c_r = int(c_color_hex[0:2], 16)
+        c_g = int(c_color_hex[2:4], 16)
+        c_b = int(c_color_hex[4:6], 16)
+        
+        c_color = QColor(c_r, c_g, c_b, c_alpha)
         painter.setBrush(QBrush(c_color))
 
         shape = self.config.shape

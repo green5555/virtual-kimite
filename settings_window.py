@@ -208,6 +208,24 @@ class SettingsWindow(QWidget):
         h_color.addStretch()
         form_layout.addRow("테이프 색상:", h_color)
 
+        # 중앙 점 색상 개별 조절
+        self.chk_individual_color = QCheckBox("중앙 점 색상 개별 조절")
+        self.chk_individual_color.setChecked(False)
+        form_layout.addRow("", self.chk_individual_color)
+
+        self.lbl_center_color_title = QLabel("중앙 점 색상:")
+        self.btn_center_color = QPushButton("중앙 색상 변경")
+        self.btn_center_color.setObjectName("btn_color")
+        self.view_center_color_box = QWidget()
+        self.view_center_color_box.setFixedSize(24, 24)
+        self.view_center_color_box.setStyleSheet("border-radius: 4px; border: 1px solid #3f3f46;")
+        
+        self.h_center_color = QHBoxLayout()
+        self.h_center_color.addWidget(self.btn_center_color)
+        self.h_center_color.addWidget(self.view_center_color_box)
+        self.h_center_color.addStretch()
+        form_layout.addRow(self.lbl_center_color_title, self.h_center_color)
+
         group_overlay.setLayout(form_layout)
         main_layout.addWidget(group_overlay)
 
@@ -282,8 +300,23 @@ class SettingsWindow(QWidget):
         # 색상 박스 표시
         self.update_color_box_preview(self.config.color)
 
+        # 중앙 점 개별 색상 값 설정
+        is_individual_color = not self.config.sync_color
+        self.chk_individual_color.setChecked(is_individual_color)
+        self.update_center_color_box_preview(self.config.center_color)
+        
+        # 가시성(Visibility) 초기 설정
+        self.lbl_center_color_title.setVisible(is_individual_color)
+        self.btn_center_color.setVisible(is_individual_color)
+        self.view_center_color_box.setVisible(is_individual_color)
+
     def update_color_box_preview(self, hex_color):
         self.view_color_box.setStyleSheet(
+            f"background-color: {hex_color}; border-radius: 4px; border: 1px solid #3f3f46;"
+        )
+
+    def update_center_color_box_preview(self, hex_color):
+        self.view_center_color_box.setStyleSheet(
             f"background-color: {hex_color}; border-radius: 4px; border: 1px solid #3f3f46;"
         )
 
@@ -300,6 +333,8 @@ class SettingsWindow(QWidget):
         self.combo_monitor.currentIndexChanged.connect(self._on_monitor_changed)
         
         self.btn_color.clicked.connect(self._on_color_pick_clicked)
+        self.chk_individual_color.toggled.connect(self._on_individual_color_toggled)
+        self.btn_center_color.clicked.connect(self._on_center_color_pick_clicked)
         self.btn_reset.clicked.connect(self._on_reset_clicked)
         self.btn_save.clicked.connect(self._on_save_clicked)
 
@@ -363,6 +398,32 @@ class SettingsWindow(QWidget):
             hex_color = color.name()  # #RRGGBB 포맷
             self.config.color = hex_color
             self.update_color_box_preview(hex_color)
+            # 색상 동시 조절 상태라면 중앙 점 색상도 동기화
+            if not self.chk_individual_color.isChecked():
+                self.config.center_color = hex_color
+                self.update_center_color_box_preview(hex_color)
+
+    def _on_individual_color_toggled(self, checked):
+        self.config.sync_color = not checked
+        
+        # 가시성 동적 제어
+        self.lbl_center_color_title.setVisible(checked)
+        self.btn_center_color.setVisible(checked)
+        self.view_center_color_box.setVisible(checked)
+        
+        if not checked:
+            # 동시 조절로 전환 시 테이프 색상 복사
+            hex_color = self.config.color
+            self.config.center_color = hex_color
+            self.update_center_color_box_preview(hex_color)
+
+    def _on_center_color_pick_clicked(self):
+        current_qcolor = QColor(self.config.center_color)
+        color = QColorDialog.getColor(current_qcolor, self, "중앙 점 색상 선택")
+        if color.isValid():
+            hex_color = color.name()
+            self.config.center_color = hex_color
+            self.update_center_color_box_preview(hex_color)
 
     def _on_reset_clicked(self):
         # 기본값으로 리셋
@@ -374,6 +435,8 @@ class SettingsWindow(QWidget):
         self.config.center_opacity = 50
         self.config.sync_opacity = True
         self.config.color = "#e6c300"
+        self.config.center_color = "#e6c300"
+        self.config.sync_color = True
         self.config.shape = "diamond"
         self.config.monitor_index = 0
         

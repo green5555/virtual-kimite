@@ -19,6 +19,8 @@ class AppConfig(QObject):
         self._center_opacity = 50  # 0 to 100 (중앙 점 개별 투명도)
         self._sync_opacity = True  # 투명도 동시 조절 여부
         self._color = "#e6c300"  # 기본 따뜻한 반투명 노란색
+        self._center_color = "#e6c300"  # 중앙 점 개별 색상
+        self._sync_color = True  # 색상 동시 조절 여부
         self._shape = "diamond"  # diamond, circle, square
         self._monitor_index = 0  # 0: 주 모니터, 1..: 보조 모니터
         
@@ -34,6 +36,8 @@ class AppConfig(QObject):
             "center_opacity": self._center_opacity,
             "sync_opacity": self._sync_opacity,
             "color": self._color,
+            "center_color": self._center_color,
+            "sync_color": self._sync_color,
             "shape": self._shape,
             "monitor_index": self._monitor_index
         }
@@ -47,6 +51,8 @@ class AppConfig(QObject):
         self._center_opacity = data.get("center_opacity", 50)
         self._sync_opacity = data.get("sync_opacity", True)
         self._color = data.get("color", "#e6c300")
+        self._center_color = data.get("center_color", "#e6c300")
+        self._sync_color = data.get("sync_color", True)
         self._shape = data.get("shape", "diamond")
         self._monitor_index = data.get("monitor_index", 0)
 
@@ -165,4 +171,24 @@ class AppConfig(QObject):
     def sync_opacity(self, value):
         if self._sync_opacity != value:
             self._sync_opacity = bool(value)
+            self.changed.emit()
+
+    @property
+    def center_color(self):
+        return self._center_color
+
+    @center_color.setter
+    def center_color(self, value):
+        if self._center_color != value:
+            self._center_color = str(value)
+            self.changed.emit()
+
+    @property
+    def sync_color(self):
+        return self._sync_color
+
+    @sync_color.setter
+    def sync_color(self, value):
+        if self._sync_color != value:
+            self._sync_color = bool(value)
             self.changed.emit()
