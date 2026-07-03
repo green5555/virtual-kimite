@@ -174,17 +174,18 @@ class SettingsWindow(QWidget):
         form_layout.addRow("테이프 투명도:", h_op)
 
         # 동시 조절 체크박스 및 중앙 점 투명도 슬라이더
-        self.chk_sync_opacity = QCheckBox("테이프와 중앙 점 투명도 동시 조절")
-        self.chk_sync_opacity.setChecked(True)
-        form_layout.addRow("", self.chk_sync_opacity)
+        self.chk_individual_opacity = QCheckBox("중앙 점 투명도 개별 조절")
+        self.chk_individual_opacity.setChecked(False)
+        form_layout.addRow("", self.chk_individual_opacity)
 
+        self.lbl_center_opacity_title = QLabel("중앙 점 투명도:")
         self.slider_center_opacity = QSlider(Qt.Horizontal)
         self.slider_center_opacity.setRange(5, 100)
         self.lbl_center_opacity_val = QLabel("50%")
         h_cop = QHBoxLayout()
         h_cop.addWidget(self.slider_center_opacity)
         h_cop.addWidget(self.lbl_center_opacity_val)
-        form_layout.addRow("중앙 점 투명도:", h_cop)
+        form_layout.addRow(self.lbl_center_opacity_title, h_cop)
 
         # 중앙 모양 콤보박스
         self.combo_shape = QComboBox()
@@ -255,10 +256,15 @@ class SettingsWindow(QWidget):
         self.lbl_opacity_val.setText(f"{self.config.opacity}%")
 
         # 중앙 점 개별 투명도 값 설정
-        self.chk_sync_opacity.setChecked(self.config.sync_opacity)
+        is_individual = not self.config.sync_opacity
+        self.chk_individual_opacity.setChecked(is_individual)
         self.slider_center_opacity.setValue(self.config.center_opacity)
         self.lbl_center_opacity_val.setText(f"{self.config.center_opacity}%")
-        self.slider_center_opacity.setEnabled(not self.config.sync_opacity)
+        
+        # 가시성(Visibility) 초기 설정
+        self.lbl_center_opacity_title.setVisible(is_individual)
+        self.slider_center_opacity.setVisible(is_individual)
+        self.lbl_center_opacity_val.setVisible(is_individual)
 
         # 중앙 모양 매칭
         idx = self.combo_shape.findData(self.config.shape)
@@ -287,7 +293,7 @@ class SettingsWindow(QWidget):
         self.slider_length.valueChanged.connect(self._on_length_changed)
         self.slider_center_size.valueChanged.connect(self._on_center_size_changed)
         self.slider_opacity.valueChanged.connect(self._on_opacity_changed)
-        self.chk_sync_opacity.toggled.connect(self._on_sync_opacity_toggled)
+        self.chk_individual_opacity.toggled.connect(self._on_individual_opacity_toggled)
         self.slider_center_opacity.valueChanged.connect(self._on_center_opacity_changed)
         self.combo_shape.currentIndexChanged.connect(self._on_shape_changed)
         self.combo_monitor.currentIndexChanged.connect(self._on_monitor_changed)
@@ -315,16 +321,22 @@ class SettingsWindow(QWidget):
     def _on_opacity_changed(self, value):
         self.config.opacity = value
         self.lbl_opacity_val.setText(f"{value}%")
-        # 동시 조절 상태라면 중앙 점 투명도 슬라이더와 값도 동기화
-        if self.chk_sync_opacity.isChecked():
+        # 개별 조절 상태가 아니라면 중앙 점 투명도도 동시 동기화
+        if not self.chk_individual_opacity.isChecked():
             self.slider_center_opacity.setValue(value)
             self.config.center_opacity = value
 
-    def _on_sync_opacity_toggled(self, checked):
-        self.config.sync_opacity = checked
-        self.slider_center_opacity.setEnabled(not checked)
-        if checked:
-            # 동기화가 활성화되면 테이프 투명도 값을 즉시 복사
+    def _on_individual_opacity_toggled(self, checked):
+        # checked가 True이면 sync_opacity는 False가 됨
+        self.config.sync_opacity = not checked
+        
+        # 동적 가시성 제어
+        self.lbl_center_opacity_title.setVisible(checked)
+        self.slider_center_opacity.setVisible(checked)
+        self.lbl_center_opacity_val.setVisible(checked)
+        
+        if not checked:
+            # 개별 조절이 꺼지면 테이프 투명도 값을 복사
             val = self.slider_opacity.value()
             self.slider_center_opacity.setValue(val)
             self.config.center_opacity = val
