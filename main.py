@@ -41,7 +41,7 @@ class MainApp:
         event.ignore()  # 닫기 이벤트 취소
         self.settings_window.hide()  # 설정 창만 숨김
         self.tray_icon.showMessage(
-            "멀미 방지 프로그램",
+            "Virtual Kimite",
             "설정 창이 트레이로 최소화되었습니다. 오버레이는 백그라운드에서 계속 작동합니다.",
             QSystemTrayIcon.Information,
             2000
@@ -50,7 +50,7 @@ class MainApp:
     def setup_tray(self):
         # 임시 생성한 동적 아이콘을 트레이 아이콘으로 등록
         self.tray_icon = QSystemTrayIcon(self.create_tray_icon(), self.app)
-        self.tray_icon.setToolTip("멀미 방지 오버레이")
+        self.tray_icon.setToolTip("Virtual Kimite")
         
         # 우클릭 메뉴 구성
         menu = QMenu()
@@ -112,7 +112,7 @@ class MainApp:
 
     def show_welcome_message(self):
         self.tray_icon.showMessage(
-            "멀미 방지 프로그램",
+            "Virtual Kimite",
             "시스템 백그라운드에서 오버레이가 작동 중입니다.",
             QSystemTrayIcon.Information,
             3000

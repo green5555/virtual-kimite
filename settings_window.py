@@ -111,7 +111,7 @@ class SettingsWindow(QWidget):
         super().__init__()
         self.config = config
         
-        self.setWindowTitle("멀미 방지 오버레이 설정")
+        self.setWindowTitle("Virtual Kimite - 멀미 방지 설정")
         self.resize(400, 500)
         self.setStyleSheet(STYLE_SHEET)
         
@@ -126,7 +126,7 @@ class SettingsWindow(QWidget):
 
         # 1. 활성화 토글 그룹
         top_layout = QHBoxLayout()
-        self.chk_enable = QCheckBox("멀미 방지 오버레이 활성화")
+        self.chk_enable = QCheckBox("Virtual Kimite 오버레이 활성화")
         self.chk_enable.setStyleSheet("font-size: 14px; font-weight: bold;")
         top_layout.addWidget(self.chk_enable)
         main_layout.addLayout(top_layout)
