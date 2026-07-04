@@ -139,7 +139,7 @@ class SettingsWindow(QWidget):
 
         # 테이프 두께 슬라이더
         self.slider_thickness = QSlider(Qt.Horizontal)
-        self.slider_thickness.setRange(5, 100)
+        self.slider_thickness.setRange(5, 200)
         self.lbl_thickness_val = QLabel("30px")
         h_thick = QHBoxLayout()
         h_thick.addWidget(self.slider_thickness)
